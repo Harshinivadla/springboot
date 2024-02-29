@@ -1,0 +1,437 @@
+{\rtf1\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil\fcharset0 Calibri;}{\f1\fnil Consolas;}{\f2\fnil\fcharset0 Consolas;}}
+{\colortbl ;\red0\green0\blue0;\red212\green212\blue212;\red127\green0\blue85;\red100\green100\blue100;\red42\green0\blue255;\red0\green0\blue192;\red106\green62\blue62;\red147\green161\blue161;\red42\green161\blue152;\red181\green137\blue0;\red38\green139\blue210;\red0\green0\blue255;}
+{\*\generator Riched20 10.0.19041}\viewkind4\uc1 
+\pard\sa200\sl276\slmult1\f0\fs22\lang9 Employee Task Spring Security Task\par
+\par
+\par
+\cf1\highlight2\f1\fs20 EmployeeSpringSecurityApplication\line\line\line\line package com.example.demo;\par
+\par
+import org.slf4j.Logger;\par
+import org.slf4j.LoggerFactory;\par
+import org.springframework.beans.factory.annotation.Autowired;\par
+import org.springframework.boot.CommandLineRunner;\par
+import org.springframework.boot.SpringApplication;\par
+import org.springframework.boot.autoconfigure.SpringBootApplication;\par
+\par
+import com.example.demo.model.Employee;\par
+import com.example.demo.repository.EmployeeRepository;\par
+\par
+@SpringBootApplication\par
+public class EmployeeSpringSecurityApplication implements CommandLineRunner\{\par
+\par
+\tab public static final Logger logger = LoggerFactory.getLogger(EmployeeSpringSecurityApplication.class);\par
+\tab\par
+\tab public static void main(String[] args) \{\par
+\tab\tab SpringApplication.run(EmployeeSpringSecurityApplication.class, args);\par
+\tab\tab logger.info("Springboot application started");\par
+\tab\}\par
+\par
+\tab @Autowired\par
+\tab public EmployeeRepository repo;\par
+\par
+\tab @Override\par
+\tab public void run(String... args) throws Exception \{\par
+\tab\tab\par
+\tab\tab Employee emp1 = new Employee("Admin" , 100000);\par
+\tab\tab repo.save(emp1);\par
+\tab\tab\par
+\tab\tab Employee emp2 = new Employee("Harshini" , 68000);\par
+\tab\tab repo.save(emp2);\par
+\tab\tab\par
+\tab\tab\par
+\tab\tab\par
+\tab\}\par
+\}\par
+\par
+\par
+\par
+\par
+\par
+\par
+\f2\lang1033 EmployeeController\par
+\par
+\par
+\par
+\cf3\highlight0\b\f1 package\cf1\b0  com.example.demo.controller;\cf0\par
+\par
+\cf3\b import\cf1\b0  \ul java.util.ArrayList\ulnone ;\cf0\par
+\cf3\b import\cf1\b0  java.util.List;\cf0\par
+\par
+\cf3\b import\cf1\b0  org.slf4j.Logger;\cf0\par
+\cf3\b import\cf1\b0  org.slf4j.LoggerFactory;\cf0\par
+\cf3\b import\cf1\b0  org.springframework.beans.factory.annotation.Autowired;\cf0\par
+\cf3\b import\cf1\b0  org.springframework.context.annotation.ComponentScan;\cf0\par
+\cf3\b import\cf1\b0  org.springframework.http.HttpStatus;\cf0\par
+\cf3\b import\cf1\b0  org.springframework.http.ResponseEntity;\cf0\par
+\cf3\b import\cf1\b0  org.springframework.security.access.prepost.PreAuthorize;\cf0\par
+\cf3\b import\cf1\b0  org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;\cf0\par
+\cf3\b import\cf1\b0  org.springframework.web.bind.annotation.DeleteMapping;\cf0\par
+\cf3\b import\cf1\b0  org.springframework.web.bind.annotation.GetMapping;\cf0\par
+\cf3\b import\cf1\b0  org.springframework.web.bind.annotation.PathVariable;\cf0\par
+\cf3\b import\cf1\b0  \highlight2 org.springframework.web.bind.annotation.PostMapping\highlight0 ;\cf0\par
+\cf3\b import\cf1\b0  org.springframework.web.bind.annotation.PutMapping;\cf0\par
+\cf3\b import\cf1\b0  org.springframework.web.bind.annotation.RequestBody;\cf0\par
+\cf3\b import\cf1\b0  org.springframework.web.bind.annotation.RequestMapping;\cf0\par
+\cf3\b import\cf1\b0  org.springframework.web.bind.annotation.RestController;\cf0\par
+\par
+\cf3\b import\cf1\b0  com.example.demo.exception.ResourceException;\cf0\par
+\cf3\b import\cf1\b0  com.example.demo.model.Employee;\cf0\par
+\cf3\b import\cf1\b0  com.example.demo.repository.EmployeeRepository;\cf0\par
+\par
+\cf3\b import\cf1\b0  jakarta.validation.Valid;\cf0\par
+\par
+\cf4 @RestController\cf0\par
+\cf4 @EnableMethodSecurity\cf0\par
+\cf4 @RequestMapping\cf1 (\cf5 "/employees"\cf1 )\cf0\par
+\cf4 @ComponentScan\cf1 (basePackages = \cf5 "com.example.demo"\cf1 )\cf0\par
+\par
+\cf3\b public\cf1\b0  \cf3\b class\cf1\b0  EmployeeController \{\cf0\par
+\par
+\cf1\tab\cf3\b public\cf1\b0  \cf3\b static\cf1\b0  \cf3\b final\cf1\b0  Logger \cf6\b\i logger\cf1\b0\i0  = LoggerFactory.\i getLogger\i0 (EmployeeController.\cf3\b class\cf1\b0 );\cf0\par
+\cf1\tab\cf0\par
+\cf1\tab\cf4 @Autowired\cf0\par
+\cf1\tab\cf3\b public\cf1\b0  EmployeeRepository \cf6 repo\cf1 ;\cf0\par
+\cf1\tab\cf0\par
+\cf1\tab\cf4 @GetMapping\cf0\par
+\cf1\tab\cf3\b public\cf1\b0  List<Employee> employees()\{\cf0\par
+\cf1\tab\tab List<Employee> \cf7 employees\cf1  = \cf6 repo\cf1 .findAll();\cf0\par
+\cf1\tab\tab\cf3\b if\cf1\b0  (\cf7 employees\cf1  != \cf3\b null\cf1\b0 ) \{\cf0\par
+\cf1\tab\tab\tab\cf6\b\i logger\cf1\b0\i0 .info(\cf5 "Fetched employees..."\cf1 );\cf0\par
+\cf1\tab\tab\}\cf3\b else\cf1\b0  \{\cf0\par
+\cf1\tab\tab\tab\cf6\b\i logger\cf1\b0\i0 .error(\cf5 "List is empty!!"\cf1 );\cf0\par
+\cf1\tab\tab\}\cf0\par
+\cf1\tab\tab\cf3\b return\cf1\b0  \cf7 employees\cf1 ;\cf0\par
+\cf1\tab\}\cf0\par
+\cf1\tab\cf0\par
+\cf1\tab\cf4 @PreAuthorize\cf1 (\cf5 "hasRole('ADMIN')"\cf1 )\cf0\par
+\cf1\tab\cf4 @\highlight2 PostMapping\cf0\highlight0\par
+\cf1\tab\cf3\b public\cf1\b0  Employee createEmployee(\cf4 @Valid\cf1  \cf4 @RequestBody\cf1  Employee \cf7 employee\cf1 ) \{\cf0\par
+\cf1\tab\tab\cf3\b if\cf1\b0 (\cf7 employee\cf1 .getName()==\cf3\b null\cf1\b0  || \cf7 employee\cf1 .getName().length()==0) \{\cf0\par
+\cf1\tab\tab\tab\cf6\b\i logger\cf1\b0\i0 .error(\cf5 "Name can't be null"\cf1 );\cf0\par
+\cf1\tab\tab\tab\cf3\b throw\cf1\b0  \cf3\b new\cf1\b0  ResourceException(\cf5 ""\cf1 );\cf0\par
+\cf1\tab\tab\}\cf3\b else\cf1\b0  \{\cf0\par
+\cf1\tab\tab\tab\cf6\b\i logger\cf1\b0\i0 .info(\cf5 "New Student added.."\cf1 );\cf0\par
+\cf1\tab\tab\}\cf0\par
+\cf1\tab\tab\cf3\b return\cf1\b0  \cf6 repo\cf1 .save(\cf7 employee\cf1 );\cf0\par
+\cf1\tab\}\cf0\par
+\cf1\tab\cf0\par
+\cf1\tab\cf4 @GetMapping\cf1 (\cf5 "\{id\}"\cf1 )\cf0\par
+\cf1\tab\cf3\b public\cf1\b0  ResponseEntity<Employee> getEmployee(\cf4 @PathVariable\cf1  \cf3\b int\cf1\b0  \cf7 id\cf1 )\{\cf0\par
+\cf1\tab\tab\cf6\b\i logger\cf1\b0\i0 .warn(\cf5 "Enter correct ID!!"\cf1 );\cf0\par
+\cf1\tab\tab Employee \cf7 employee\cf1  = \cf6 repo\cf1 .findById(\cf7 id\cf1 ).orElseThrow(()-> \cf3\b new\cf1\b0  ResourceException(\cf5 ""\cf1 ));\cf0\par
+\cf1\tab\tab\cf6\b\i logger\cf1\b0\i0 .warn(\cf5 "Fetched student by ID: \{\}"\cf1 ,\cf7 id\cf1 );\cf0\par
+\cf1\tab\tab\cf3\b return\cf1\b0  ResponseEntity.\i ok\i0 (\cf7 employee\cf1 );\cf0\par
+\cf1\tab\}\cf0\par
+\cf1\tab\cf0\par
+\cf1\tab\cf4 @PreAuthorize\cf1 (\cf5 "hasRole('ADMIN')"\cf1 )\cf0\par
+\cf1\tab\cf4 @PutMapping\cf1 (\cf5 "\{id\}"\cf1 )\cf0\par
+\cf1\tab\cf3\b public\cf1\b0  ResponseEntity<Employee> updateEmployee(\cf4 @PathVariable\cf1  \cf3\b int\cf1\b0  \cf7 id\cf1 , \cf4 @RequestBody\cf1  Employee \cf7 employee\cf1 )\{\cf0\par
+\cf1\tab\tab Employee \cf7 updateEmployee\cf1  = \cf6 repo\cf1 .findById(\cf7 id\cf1 ).orElseThrow(()-> \cf3\b new\cf1\b0  ResourceException(\cf5 ""\cf1 ));\cf0\par
+\cf1\tab\tab\cf7 updateEmployee\cf1 .setName(\cf7 employee\cf1 .getName());\cf0\par
+\cf1\tab\tab\cf7 updateEmployee\cf1 .setSalary(\cf7 employee\cf1 .getSalary());\cf0\par
+\cf1\tab\tab\cf6 repo\cf1 .save(\cf7 updateEmployee\cf1 );\cf0\par
+\cf1\tab\tab\cf0\par
+\cf1\tab\tab\cf3\b if\cf1\b0 (\cf7 employee\cf1 .getName()==\cf3\b null\cf1\b0  || \cf7 employee\cf1 .getName().length()==0) \{\cf0\par
+\cf1\tab\tab\tab\cf6\b\i logger\cf1\b0\i0 .info(\cf5 "Name can,t be null"\cf1 );\cf0\par
+\cf1\tab\tab\tab\cf3\b throw\cf1\b0  \cf3\b new\cf1\b0  ResourceException(\cf5 ""\cf1 );\cf0\par
+\cf1\tab\tab\}\cf3\b else\cf1\b0  \{\cf0\par
+\cf1\tab\tab\tab\cf6\b\i logger\cf1\b0\i0 .info(\cf5 "Updated successfully..."\cf1 );\cf0\par
+\cf1\tab\tab\}\cf0\par
+\cf1\tab\tab\cf0\par
+\cf1\tab\tab\cf3\b return\cf1\b0  ResponseEntity.\i ok\i0 (\cf7 updateEmployee\cf1 );\cf0\par
+\cf1\tab\}\cf0\par
+\cf1\tab\cf0\par
+\cf1\tab\cf4 @PreAuthorize\cf1 (\cf5 "hasRole('ADMIN')"\cf1 )\cf0\par
+\cf1\tab\cf4 @DeleteMapping\cf1 (\cf5 "\{id\}"\cf1 )\cf0\par
+\cf1\tab\cf3\b public\cf1\b0  ResponseEntity<Employee> deleteEmployee(\cf4 @PathVariable\cf1  \cf3\b int\cf1\b0  \cf7 id\cf1 )\{\cf0\par
+\cf1\tab\tab Employee \cf7 deleteEmployee\cf1  = \cf6 repo\cf1 .findById(\cf7 id\cf1 ).orElseThrow(()-> \cf3\b new\cf1\b0  ResourceException(\cf5 ""\cf1 ));\cf0\par
+\cf1\tab\tab\cf6 repo\cf1 .delete(\cf7 deleteEmployee\cf1 );\cf0\par
+\cf1\tab\tab\cf6\b\i logger\cf1\b0\i0 .info(\cf5 "Deleted successfully..."\cf1 );\cf0\par
+\cf1\tab\tab\cf3\b return\cf1\b0  \cf3\b new\cf1\b0  ResponseEntity<>(HttpStatus.\cf6\b\i NO_CONTENT\cf1\b0\i0 );\cf0\par
+\cf1\tab\}\cf0\par
+\cf1\}\cf0\par
+\cf1\highlight2\f2\lang9\par
+\par
+\par
+\par
+\par
+\lang1033 SecurityConfig\par
+\par
+\par
+\par
+\par
+\par
+package com.example.demo.config;\par
+\par
+import org.springframework.context.annotation.Bean;\par
+import org.springframework.context.annotation.Configuration;\par
+import org.springframework.security.config.Customizer;\par
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;\par
+import org.springframework.security.core.userdetails.User;\par
+import org.springframework.security.core.userdetails.UserDetails;\par
+import org.springframework.security.core.userdetails.UserDetailsService;\par
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;\par
+import org.springframework.security.crypto.password.PasswordEncoder;\par
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;\par
+import org.springframework.security.web.SecurityFilterChain;\par
+\par
+@Configuration\par
+public class SecurityConfig \{\par
+\par
+\tab @Bean\par
+\tab public static PasswordEncoder passwordEncoder() \{\par
+\tab\tab return new BCryptPasswordEncoder();\par
+\tab\}\par
+\tab\par
+\tab @Bean\par
+\tab SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception \{\par
+\tab\tab\par
+\tab\tab http.csrf().disable()\par
+\tab\tab\tab .authorizeHttpRequests((authorize)->authorize.anyRequest().authenticated())\par
+\tab\tab\tab .httpBasic(Customizer.withDefaults());\tab\tab\par
+\tab\tab\par
+\tab\tab return http.build();\par
+\tab\}\par
+\tab\par
+//\tab @Bean\par
+//\tab public UserDetailsService userDetailsService() \{\par
+//\tab\tab UserDetails harshini = User.builder()\par
+//\tab\tab\tab\tab .username("harshini")\par
+//\tab\tab\tab\tab .password(passwordEncoder().encode("harshini"))\par
+//\tab\tab\tab\tab .roles("USER")\par
+//\tab\tab\tab\tab .build();\par
+//\tab\tab\par
+//\tab\tab UserDetails admin = User.builder()\par
+//\tab\tab\tab\tab .username("admin")\par
+//\tab\tab\tab\tab .password(passwordEncoder().encode("admin"))\par
+//\tab\tab\tab\tab .roles("ADMIN")\par
+//\tab\tab\tab\tab .build();\par
+//\tab\tab\par
+//\tab\tab return new InMemoryUserDetailsManager(harshini,admin);\par
+//\tab\}\par
+\}\par
+\par
+\par
+\par
+\par
+\par
+Employee.java\par
+\par
+\par
+\par
+\par
+package com.example.demo.model;\par
+\par
+import jakarta.persistence.Column;\par
+import jakarta.persistence.Entity;\par
+import jakarta.persistence.GeneratedValue;\par
+import jakarta.persistence.GenerationType;\par
+import jakarta.persistence.Id;\par
+import jakarta.persistence.Table;\par
+\par
+@Entity\par
+@Table(name= "employees")\par
+public class Employee \{\par
+\par
+\tab @Id\par
+\tab @GeneratedValue(strategy = GenerationType.IDENTITY)\par
+\tab private int id;\par
+\tab\par
+\tab @Column\par
+\tab private String name;\par
+\tab\par
+\tab @Column\par
+\tab private float salary;\par
+\tab\par
+\tab\par
+\tab\par
+\tab public Employee(String name, float salary) \{\par
+\tab\tab super();\par
+\tab\tab this.name = name;\par
+\tab\tab this.salary = salary;\par
+\tab\}\par
+\tab\par
+\tab\par
+\tab public Employee() \{\par
+\tab\tab super();\par
+\tab\}\par
+\par
+\par
+\tab public int getId() \{\par
+\tab\tab return id;\par
+\tab\}\par
+\tab public void setId(int id) \{\par
+\tab\tab this.id = id;\par
+\tab\}\par
+\tab\par
+\tab\par
+\tab public String getName() \{\par
+\tab\tab return name;\par
+\tab\}\par
+\tab public void setName(String name) \{\par
+\tab\tab this.name = name;\par
+\tab\}\par
+\tab\par
+\tab\par
+\tab public float getSalary() \{\par
+\tab\tab return salary;\par
+\tab\}\par
+\tab public void setSalary(float salary) \{\par
+\tab\tab this.salary = salary;\par
+\tab\}\par
+\}\f1\lang9\par
+\par
+\par
+\par
+\par
+\f2\lang1033 EmployeeRepository\par
+\par
+\par
+\par
+package com.example.demo.repository;\par
+\par
+import org.springframework.data.jpa.repository.JpaRepository;\par
+\par
+import com.example.demo.model.Employee;\par
+\par
+public interface EmployeeRepository extends JpaRepository<Employee , Integer>\{\par
+\par
+\}\f1\lang9\par
+\par
+\par
+\par
+\par
+\par
+\f2\lang1033 ResourceException\par
+\par
+\par
+\par
+\par
+\par
+\cf3\highlight0\b\f1 package\cf1\b0  com.example.demo.exception;\cf0\par
+\par
+\cf3\b import\cf1\b0  org.springframework.http.HttpStatus;\cf0\par
+\cf3\b import\cf1\b0  org.springframework.web.bind.annotation.ResponseStatus;\cf0\par
+\par
+\cf4 @ResponseStatus\cf1 (value = HttpStatus.\cf6\b\i NOT_FOUND\cf1\b0\i0 )\cf0\par
+\cf3\b public\cf1\b0  \cf3\b class\cf1\b0  \ul ResourceException\ulnone  \cf3\b extends\cf1\b0  RuntimeException\{\cf0\par
+\par
+\cf1\tab\cf3\b public\cf1\b0  ResourceException(String \cf7 message\cf1 ) \{\cf0\par
+\cf1\tab\tab\cf3\b super\cf1\b0 (\cf7 message\cf1 );\cf0\par
+\cf1\tab\}\cf0\par
+\cf1\}\par
+\par
+\par
+\par
+\par
+\par
+\f2 application.properties\par
+\par
+\par
+\par
+\par
+\cf8\f1 #spring.security.user.name=harshini\cf0\par
+\cf8 #spring.security.user.password=harshini\cf0\par
+\cf8 #spring.security.user.roles=ADMIN\cf0\par
+\par
+\cf1 spring.datasource.url= \cf9 jdbc:mysql://localhost:3306/springboot\cf0\par
+\cf1 spring.datasource.username= \cf9 root\cf0\par
+\cf1 spring.datasource.password= \cf9 H@rshini1111\cf0\par
+\cf1 spring.jpa.hibernate.ddl-auto= \cf9 update\cf0\par
+\par
+\cf1 logging.level.com.example.demo=\cf9 debug\par
+\par
+\par
+\par
+\par
+\par
+\par
+\f2 pom.xml\par
+\par
+\par
+\cf10\ul\f1 <\ulnone ?\cf11 xml\cf8  version\cf10 =\cf8 "\cf10 1.0\cf8 " encoding\cf10 =\cf8 "\cf10 UTF-8\cf8 "\cf10 ?>\cf0\par
+\cf1 <\cf11 project\cf1  \cf8 xmlns\cf1 =\cf8 "{\cf9{\field{\*\fldinst{HYPERLINK http://maven.apache.org/POM/4.0.0 }}{\fldrslt{http://maven.apache.org/POM/4.0.0\ul0\cf0}}}}\f1\fs20 "\cf1  \cf8 xmlns:xsi\cf1 =\cf8 "\cf9 http://www.w3.org/2001/XMLSchema-instance\cf8 "\cf0\par
+\cf1\tab\cf8 xsi:schemaLocation\cf1 =\cf8 "\cf9 http://maven.apache.org/POM/4.0.0 {\cf0{\field{\*\fldinst{HYPERLINK https://maven.apache.org/xsd/maven-4.0.0.xsd }}{\fldrslt{https://maven.apache.org/xsd/maven-4.0.0.xsd\ul0\cf0}}}}\cf8\f1\fs20 "\cf1 >\cf0\par
+\cf1\tab <\cf11 modelVersion\cf1 >4.0.0</\cf11 modelVersion\cf1 >\cf0\par
+\cf1\tab <\cf11 parent\cf1 >\cf0\par
+\cf1\tab\tab <\cf11 groupId\cf1 >org.springframework.boot</\cf11 groupId\cf1 >\cf0\par
+\cf1\tab\tab <\cf11 artifactId\cf1 >spring-boot-starter-parent</\cf11 artifactId\cf1 >\cf0\par
+\cf1\tab\tab <\cf11 version\cf1 >3.1.2</\cf11 version\cf1 >\cf0\par
+\cf1\tab\tab <\cf11 relativePath\cf1 /> \cf8 <!-- lookup parent from repository -->\cf0\par
+\cf1\tab </\cf11 parent\cf1 >\cf0\par
+\cf1\tab <\cf11 groupId\cf1 >com.example</\cf11 groupId\cf1 >\cf0\par
+\cf1\tab <\cf11 artifactId\cf1 >EmployeeSpringSecurity</\cf11 artifactId\cf1 >\cf0\par
+\cf1\tab <\cf11 version\cf1 >0.0.1-SNAPSHOT</\cf11 version\cf1 >\cf0\par
+\cf1\tab <\cf11 name\cf1 >EmployeeSpringSecurity</\cf11 name\cf1 >\cf0\par
+\cf1\tab <\cf11 description\cf1 >Demo project for Spring Boot</\cf11 description\cf1 >\cf0\par
+\cf1\tab <\cf11 properties\cf1 >\cf0\par
+\cf1\tab\tab <\cf11 java.version\cf1 >17</\cf11 java.version\cf1 >\cf0\par
+\cf1\tab </\cf11 properties\cf1 >\cf0\par
+\cf1\tab <\cf11 dependencies\cf1 >\cf0\par
+\cf1\tab\tab <\cf11 dependency\cf1 >\cf0\par
+\cf1             <\cf11 groupId\cf1 >org.springframework.boot</\cf11 groupId\cf1 >\cf0\par
+\cf1             <\cf11 artifactId\cf1 >spring-boot-starter-data-jpa</\cf11 artifactId\cf1 >\cf0\par
+\cf1         </\cf11 dependency\cf1 >\cf0\par
+\cf1         <\cf11 dependency\cf1 >\cf0\par
+\cf1             <\cf11 groupId\cf1 >org.springframework.boot</\cf11 groupId\cf1 >\cf0\par
+\cf1             <\cf11 artifactId\cf1 >spring-boot-starter-web</\cf11 artifactId\cf1 >\cf0\par
+\cf1         </\cf11 dependency\cf1 >\cf0\par
+\cf1         \cf0\par
+\cf1\tab\tab <\cf11 dependency\cf1 >\cf0\par
+\cf1     \tab\tab <\cf11 groupId\cf1 >org.springframework.boot</\cf11 groupId\cf1 >\cf0\par
+\cf1     \tab\tab <\cf11 artifactId\cf1 >spring-boot-starter-security</\cf11 artifactId\cf1 >\cf0\par
+\cf1\tab\tab </\cf11 dependency\cf1 >\cf0\par
+\par
+\cf1\tab\tab <\cf11 dependency\cf1 >\cf0\par
+\cf1     \tab\tab <\cf11 groupId\cf1 >io.jsonwebtoken</\cf11 groupId\cf1 >\cf0\par
+\cf1     \tab\tab <\cf11 artifactId\cf1 >jjwt</\cf11 artifactId\cf1 >\cf0\par
+\cf1     \tab\tab <\cf11 version\cf1 >0.9.1</\cf11 version\cf1 >\cf0\par
+\cf1\tab\tab </\cf11 dependency\cf1 >\cf0\par
+\par
+\cf1         <\cf11 dependency\cf1 >\cf0\par
+\cf1             <\cf11 groupId\cf1 >com.mysql</\cf11 groupId\cf1 >\cf0\par
+\cf1             <\cf11 artifactId\cf1 >mysql-connector-j</\cf11 artifactId\cf1 >\cf0\par
+\cf1             <\cf11 scope\cf1 >runtime</\cf11 scope\cf1 >\cf0\par
+\cf1         </\cf11 dependency\cf1 >\cf0\par
+\cf1         <\cf11 dependency\cf1 >\cf0\par
+\cf1             <\cf11 groupId\cf1 >org.springframework.boot</\cf11 groupId\cf1 >\cf0\par
+\cf1             <\cf11 artifactId\cf1 >spring-boot-starter-test</\cf11 artifactId\cf1 >\cf0\par
+\cf1             <\cf11 scope\cf1 >test</\cf11 scope\cf1 >\cf0\par
+\cf1         </\cf11 dependency\cf1 > \cf0\par
+\cf1         <\cf11 dependency\cf1 >\cf0\par
+\cf1             <\cf11 groupId\cf1 >org.springframework.boot</\cf11 groupId\cf1 >\cf0\par
+\cf1             <\cf11 artifactId\cf1 >spring-boot-starter-cache</\cf11 artifactId\cf1 >\cf0\par
+\cf1         </\cf11 dependency\cf1 >\cf0\par
+\cf1         <\cf11 dependency\cf1 >\cf0\par
+\cf1             <\cf11 groupId\cf1 >org.springframework.boot</\cf11 groupId\cf1 >\cf0\par
+\cf1             <\cf11 artifactId\cf1 >spring-boot-starter-validation</\cf11 artifactId\cf1 >\cf0\par
+\cf1         </\cf11 dependency\cf1 >\cf0\par
+\cf1\tab </\cf11 dependencies\cf1 >\cf0\par
+\par
+\cf1\tab <\cf11 build\cf1 >\cf0\par
+\cf1\tab\tab <\cf11 plugins\cf1 >\cf0\par
+\cf1\tab\tab\tab <\cf11 plugin\cf1 >\cf0\par
+\cf1\tab\tab\tab\tab <\cf11 groupId\cf1 >org.springframework.boot</\cf11 groupId\cf1 >\cf0\par
+\cf1\tab\tab\tab\tab <\cf11 artifactId\cf1 >spring-boot-maven-plugin</\cf11 artifactId\cf1 >\cf0\par
+\cf1\tab\tab\tab\tab <\cf11 configuration\cf1 >\cf0\par
+\cf1\tab\tab\tab\tab\tab <\cf11 image\cf1 >\cf0\par
+\cf1\tab\tab\tab\tab\tab\tab <\cf11 builder\cf1 >paketobuildpacks/builder-jammy-base:latest</\cf11 builder\cf1 >\cf0\par
+\cf1\tab\tab\tab\tab\tab </\cf11 image\cf1 >\cf0\par
+\cf1\tab\tab\tab\tab </\cf11 configuration\cf1 >\cf0\par
+\cf1\tab\tab\tab </\cf11 plugin\cf1 >\cf0\par
+\cf1\tab\tab </\cf11 plugins\cf1 >\cf0\par
+\cf1\tab </\cf11 build\cf1 >\cf0\par
+\par
+\cf1 </\cf11 project\cf1 >\cf0\par
+\cf1\highlight2\f2\lang9\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\cf0\highlight0\f0\fs22\par
+}
+ 

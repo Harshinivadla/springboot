@@ -1,0 +1,222 @@
+//package com.example.demo.controller;
+//
+//import java.util.List;
+//
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.http.HttpStatus;
+//import org.springframework.http.ResponseEntity;
+//import org.springframework.security.access.prepost.PreAuthorize;
+//import org.springframework.security.authentication.AuthenticationManager;
+//import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+//import org.springframework.security.core.Authentication;
+//import org.springframework.web.bind.annotation.DeleteMapping;
+//import org.springframework.web.bind.annotation.GetMapping;
+//import org.springframework.web.bind.annotation.PathVariable;
+//import org.springframework.web.bind.annotation.PostMapping;
+//import org.springframework.web.bind.annotation.PutMapping;
+//import org.springframework.web.bind.annotation.RequestBody;
+//import org.springframework.web.bind.annotation.RequestMapping;
+//import org.springframework.web.bind.annotation.RestController;
+//
+//import com.example.demo.exception.ResourceException;
+//import com.example.demo.model.AuthRequest;
+//import com.example.demo.model.Employee;
+//import com.example.demo.repository.EmployeeRepository;
+//import com.example.demo.service.JwtService;
+//
+//import jakarta.validation.Valid;
+//
+//@RestController
+//@RequestMapping("/employees")
+//public class EmployeeController {
+//
+//    private static final Logger logger = LoggerFactory.getLogger(EmployeeController.class);
+//
+//    @Autowired
+//    private JwtService jwtService;
+//
+//    @Autowired
+//    private EmployeeRepository repo;
+//
+//    @Autowired
+//    private AuthenticationManager authenticationManager;
+//
+//    @GetMapping
+//    public List<Employee> employees() {
+//        List<Employee> employees = repo.findAll();
+//        logger.info("Fetched employees...");
+//        return employees;
+//    }
+//
+//    @PreAuthorize("hasRole('ADMIN')")
+//    @PostMapping
+//    public ResponseEntity<Employee> createEmployee(@Valid @RequestBody Employee employee) {
+//        if (employee.getName() == null || employee.getName().isEmpty()) {
+//            logger.error("Name can't be null");
+//            throw new ResourceException("Name cannot be null or empty");
+//        }
+//        logger.info("New Employee added..");
+//        Employee savedEmployee = repo.save(employee);
+//        return ResponseEntity.status(HttpStatus.CREATED).body(savedEmployee);
+//    }
+//
+//    @GetMapping("{id}")
+//    public ResponseEntity<Employee> getEmployee(@PathVariable int id) {
+//        logger.warn("Fetching employee by ID: {}", id);
+//        Employee employee = repo.findById(id)
+//                                .orElseThrow(() -> new ResourceException("Employee not found with ID: " + id));
+//        return ResponseEntity.ok(employee);
+//    }
+//
+//    @PreAuthorize("hasRole('ADMIN')")
+//    @PutMapping("{id}")
+//    public ResponseEntity<Employee> updateEmployee(@PathVariable int id, @RequestBody Employee employee) {
+//        Employee updateEmployee = repo.findById(id)
+//                                      .orElseThrow(() -> new ResourceException("Employee not found with ID: " + id));
+//        updateEmployee.setName(employee.getName());
+//        updateEmployee.setSalary(employee.getSalary());
+//        repo.save(updateEmployee);
+//        logger.info("Employee updated successfully...");
+//        return ResponseEntity.ok(updateEmployee);
+//    }
+//
+//    @PreAuthorize("hasRole('ADMIN')")
+//    @DeleteMapping("{id}")
+//    public ResponseEntity<Void> deleteEmployee(@PathVariable int id) {
+//        Employee deleteEmployee = repo.findById(id)
+//                                      .orElseThrow(() -> new ResourceException("Employee not found with ID: " + id));
+//        repo.delete(deleteEmployee);
+//        logger.info("Employee deleted successfully...");
+//        return ResponseEntity.noContent().build();
+//    }
+//
+//    @PostMapping("/authenticate")
+//    public ResponseEntity<String> authenticateAndGetToken(@RequestBody AuthRequest authRequest) {
+//        Authentication authentication = authenticationManager.authenticate(
+//            new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword())
+//        );
+//        if (authentication.isAuthenticated()) {
+//            String token = jwtService.generateToken(authRequest.getUsername());
+//            return ResponseEntity.ok(token);
+//        } else {
+//            throw new ResourceException("Invalid credentials");
+//        }
+//    }
+//}
+
+
+package com.example.demo.controller;
+
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.demo.exception.ResourceException;
+import com.example.demo.model.AuthRequest;
+import com.example.demo.model.Employee;
+import com.example.demo.repository.EmployeeRepository;
+import com.example.demo.service.JwtService;
+
+import jakarta.validation.Valid;
+
+@RestController
+@RequestMapping("/employees")
+public class EmployeeController {
+
+    private static final Logger logger = LoggerFactory.getLogger(EmployeeController.class);
+
+    @Autowired
+    private JwtService jwtService;
+
+    @Autowired
+    private EmployeeRepository repo;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+    
+    public static AuthRequest authRequest;
+    
+    public static PasswordEncoder passwordEncoder;
+
+    @GetMapping
+    public List<Employee> employees() {
+        List<Employee> employees = repo.findAll();
+        logger.info("Fetched employees...");
+        return employees;
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/new")
+    public ResponseEntity<Employee> createEmployee(@Valid @RequestBody Employee employee) {
+    	if (employee.getName() == null || employee.getName().isEmpty()) {
+            logger.error("Name can't be null");
+            throw new ResourceException("Name cannot be null or empty");
+        }
+        logger.info("New Employee added..");
+        Employee savedEmployee = repo.save(employee);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedEmployee);
+    }
+
+    @GetMapping("{id}")
+    public ResponseEntity<Employee> getEmployee(@PathVariable int id) {
+        logger.warn("Fetching employee by ID: {}", id);
+        Employee employee = repo.findById(id)
+                                .orElseThrow(() -> new ResourceException("Employee not found with ID: " + id));
+        return ResponseEntity.ok(employee);
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PutMapping("/modify/{id}")
+    public ResponseEntity<Employee> updateEmployee(@PathVariable int id, @RequestBody Employee employee) {
+        Employee updateEmployee = repo.findById(id)
+                                      .orElseThrow(() -> new ResourceException("Employee not found with ID: " + id));
+        updateEmployee.setName(employee.getName());
+        updateEmployee.setSalary(employee.getSalary());
+        repo.save(updateEmployee);
+        logger.info("Employee updated successfully...");
+        return ResponseEntity.ok(updateEmployee);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> deleteEmployee(@PathVariable int id) {
+        Employee deleteEmployee = repo.findById(id)
+                                      .orElseThrow(() -> new ResourceException("Employee not found with ID: " + id));
+        repo.delete(deleteEmployee);
+        logger.info("Employee deleted successfully...");
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/authenticate")
+    public ResponseEntity<String> authenticateAndGetToken(@RequestBody AuthRequest authRequest) {
+        Authentication authentication = authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword())
+        );
+        if (authentication.isAuthenticated()) {
+            String token = jwtService.generateToken(authRequest.getUsername());
+            return ResponseEntity.ok(token);
+        } else {
+            throw new ResourceException("Invalid credentials");
+        }
+    }
+}

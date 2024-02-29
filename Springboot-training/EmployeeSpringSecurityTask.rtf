@@ -1,0 +1,846 @@
+{\rtf1\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil\fcharset0 Calibri;}{\f1\fnil Consolas;}}
+{\colortbl ;\red127\green0\blue85;\red0\green0\blue0;\red0\green0\blue192;\red106\green62\blue62;\red147\green161\blue161;\red42\green161\blue152;\red181\green137\blue0;\red38\green139\blue210;\red0\green0\blue255;}
+{\*\generator Riched20 10.0.19041}\viewkind4\uc1 
+\pard\sa200\sl276\slmult1\f0\fs22\lang9\par
+EmployeeSpringSecurityApplication \par
+\par
+\par
+\par
+\par
+\par
+package com.example.demo;\par
+\par
+import org.slf4j.Logger;\par
+import org.slf4j.LoggerFactory;\par
+import org.springframework.beans.factory.annotation.Autowired;\par
+import org.springframework.boot.CommandLineRunner;\par
+import org.springframework.boot.SpringApplication;\par
+import org.springframework.boot.autoconfigure.SpringBootApplication;\par
+\par
+import com.example.demo.model.Employee;\par
+import com.example.demo.repository.EmployeeRepository;\par
+\par
+@SpringBootApplication\par
+public class EmployeeSpringSecurityApplication implements CommandLineRunner\{\par
+\par
+\tab public static final Logger logger = LoggerFactory.getLogger(EmployeeSpringSecurityApplication.class);\par
+\tab\par
+\tab public static void main(String[] args) \{\par
+\tab\tab SpringApplication.run(EmployeeSpringSecurityApplication.class, args);\par
+\tab\tab logger.info("Springboot application started");\par
+\tab\}\par
+\par
+\tab @Autowired\par
+\tab public EmployeeRepository repo;\par
+\par
+\tab @Override\par
+\tab public void run(String... args) throws Exception \{\par
+\tab\tab\par
+\tab\tab Employee emp1 = new Employee("Admin" , 100000);\par
+\tab\tab repo.save(emp1);\par
+\tab\tab\par
+\tab\tab Employee emp2 = new Employee("Harshini" , 68000);\par
+\tab\tab repo.save(emp2);\par
+\tab\}\par
+\}\par
+\par
+\par
+\par
+\par
+\par
+SecurityConfig\par
+\par
+\par
+\par
+\par
+\par
+package com.example.demo.config;\par
+\par
+import org.springframework.beans.factory.annotation.Autowired;\par
+import org.springframework.context.annotation.Bean;\par
+import org.springframework.context.annotation.Configuration;\par
+import org.springframework.security.authentication.AuthenticationManager;\par
+import org.springframework.security.authentication.AuthenticationProvider;\par
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;\par
+import org.springframework.security.config.Customizer;\par
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;\par
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;\par
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;\par
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;\par
+import org.springframework.security.config.http.SessionCreationPolicy;\par
+import org.springframework.security.core.userdetails.User;\par
+import org.springframework.security.core.userdetails.UserDetails;\par
+import org.springframework.security.core.userdetails.UserDetailsService;\par
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;\par
+import org.springframework.security.crypto.password.PasswordEncoder;\par
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;\par
+import org.springframework.security.web.SecurityFilterChain;\par
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;\par
+import org.springframework.stereotype.Component;\par
+\par
+import com.example.demo.filter.JwtAuthFilter;\par
+//import com.example.demo.filter.JwtAuthFilter;\par
+import com.example.demo.service.JwtService;\par
+\par
+import jakarta.servlet.Filter;\par
+//\par
+//@Configuration\par
+//@Component\par
+//public class SecurityConfig \{\par
+//\tab\par
+////\tab private final JwtAuthFilter jwtAuthFilter;\par
+////\tab\par
+////\tab public SecurityConfig(JwtAuthFilter jwtAuthFilter) \{\par
+////\tab\tab this.jwtAuthFilter = jwtAuthFilter;\par
+////\tab\}\par
+//\par
+////\tab @Autowired\par
+////\tab private JwtAuthFilter jwtAuthFilter;\par
+//\tab\par
+//\tab @Bean\par
+//\tab public static PasswordEncoder passwordEncoder() \{\par
+//\tab\tab return new BCryptPasswordEncoder();\par
+//\tab\}\par
+//\tab\par
+//\tab @Bean\par
+//    public AuthenticationProvider authenticationProvider() \{\par
+//        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();\par
+////        UserDetailsService userDetailsService = null;\par
+////        provider.setUserDetailsService(userDetailsService);\par
+//        return provider;\par
+//    \}\par
+//\tab\par
+//\tab @Autowired\par
+//\tab private AuthenticationProvider authenticationProvider;\par
+//\par
+//\tab @Bean\par
+//\tab public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception \{\par
+//\tab     Filter jwtAuthFilter = null;\par
+//\tab\tab http.csrf().disable()\par
+//\tab         .authorizeHttpRequests((authorize)->authorize\par
+//\tab             .anyRequest().authenticated())\par
+//\tab         .httpBasic(Customizer.withDefaults())\par
+//\tab         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)\par
+//\tab         .and()\par
+//\tab         .authenticationProvider(authenticationProvider)\par
+//\tab         .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);\par
+//\tab     return http.build();\par
+//\tab\}\par
+//\par
+//\tab\par
+//\tab @Bean\par
+//\tab public UserDetailsService userDetailsService() \{\par
+//\tab\tab UserDetails harshini = User.builder()\par
+//\tab\tab\tab\tab .username("harshini")\par
+//\tab\tab\tab\tab .password(passwordEncoder().encode("harshini"))\par
+//\tab\tab\tab\tab .roles("USER")\par
+//\tab\tab\tab\tab .build();\par
+//\tab\tab\par
+//\tab\tab UserDetails admin = User.builder()\par
+//\tab\tab\tab\tab .username("admin")\par
+//\tab\tab\tab\tab .password(passwordEncoder().encode("admin"))\par
+//\tab\tab\tab\tab .roles("ADMIN")\par
+//\tab\tab\tab\tab .build();\par
+//\tab\tab\par
+//\tab\tab return new InMemoryUserDetailsManager(harshini,admin);\par
+//\tab\}\par
+//\tab\par
+//\tab @Bean\par
+//\tab public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception \{\par
+//\tab\tab return config.getAuthenticationManager();\par
+//\tab\}\par
+//\}\par
+\par
+\par
+@Configuration\par
+@Component\par
+public class SecurityConfig \{\par
+    \par
+//  private final JwtAuthFilter jwtAuthFilter;\par
+//  \par
+//  public SecurityConfig(JwtAuthFilter jwtAuthFilter) \{\par
+//      this.jwtAuthFilter = jwtAuthFilter;\par
+//  \}\par
+\par
+  @Autowired\par
+  private JwtAuthFilter jwtAuthFilter;\par
+    \par
+    @Bean\par
+    public static PasswordEncoder passwordEncoder() \{\par
+        return new BCryptPasswordEncoder();\par
+    \}\par
+    \par
+    @Bean\par
+    public AuthenticationProvider authenticationProvider() \{\par
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();\par
+        provider.setUserDetailsService(userDetailsService());\par
+        provider.setPasswordEncoder(passwordEncoder());\par
+        return provider;\par
+    \}\par
+    \par
+    @Autowired\par
+    private AuthenticationProvider authenticationProvider;\par
+\par
+    @Bean\par
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception \{\par
+        \par
+        http.csrf().disable()\par
+            .authorizeHttpRequests((authorize)->authorize\par
+                .anyRequest().authenticated())\par
+            .httpBasic(Customizer.withDefaults())\par
+            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)\par
+            .and()\par
+            .authenticationProvider(authenticationProvider)\par
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);\par
+        return http.build();\par
+    \}\par
+\par
+    \par
+    @Bean\par
+    public UserDetailsService userDetailsService() \{\par
+        UserDetails harshini = User.builder()\par
+                .username("harshini")\par
+                .password(passwordEncoder().encode("harshini"))\par
+                .roles("USER")\par
+                .build();\par
+        \par
+        UserDetails admin = User.builder()\par
+                .username("admin")\par
+                .password(passwordEncoder().encode("admin"))\par
+                .roles("ADMIN")\par
+                .build();\par
+        \par
+        return new InMemoryUserDetailsManager(harshini,admin);\par
+    \}\par
+    \par
+    @Bean\par
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception \{\par
+        return config.getAuthenticationManager();\par
+    \}\par
+\}\par
+\par
+\par
+\par
+\par
+\par
+EmployeeController\par
+\par
+\par
+\par
+package com.example.demo.controller;\par
+\par
+import java.util.ArrayList;\par
+import java.util.List;\par
+\par
+import org.slf4j.Logger;\par
+import org.slf4j.LoggerFactory;\par
+import org.springframework.beans.factory.annotation.Autowired;\par
+import org.springframework.context.annotation.ComponentScan;\par
+import org.springframework.http.HttpStatus;\par
+import org.springframework.http.ResponseEntity;\par
+import org.springframework.security.access.prepost.PreAuthorize;\par
+import org.springframework.security.authentication.AuthenticationManager;\par
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;\par
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;\par
+import org.springframework.security.core.Authentication;\par
+import org.springframework.web.bind.annotation.DeleteMapping;\par
+import org.springframework.web.bind.annotation.GetMapping;\par
+import org.springframework.web.bind.annotation.PathVariable;\par
+import org.springframework.web.bind.annotation.PostMapping;\par
+import org.springframework.web.bind.annotation.PutMapping;\par
+import org.springframework.web.bind.annotation.RequestBody;\par
+import org.springframework.web.bind.annotation.RequestMapping;\par
+import org.springframework.web.bind.annotation.RestController;\par
+\par
+import com.example.demo.exception.ResourceException;\par
+import com.example.demo.model.AuthRequest;\par
+import com.example.demo.model.Employee;\par
+import com.example.demo.repository.EmployeeRepository;\par
+import com.example.demo.service.JwtService;\par
+\par
+import jakarta.validation.Valid;\par
+\par
+@RestController\par
+@EnableMethodSecurity\par
+@RequestMapping("/employees")\par
+@ComponentScan(basePackages = "com.example.demo")\par
+\par
+public class EmployeeController \{\par
+\par
+\tab public static final Logger logger = LoggerFactory.getLogger(EmployeeController.class);\par
+\tab\par
+\tab @Autowired\par
+\tab private JwtService jwtService;\par
+\tab\par
+\tab @Autowired\par
+\tab public EmployeeRepository repo;\par
+\tab\par
+\tab @Autowired\par
+\tab private AuthenticationManager authenticationManager;\par
+\tab\par
+\tab @GetMapping\par
+\tab public List<Employee> employees()\{\par
+\tab\tab List<Employee> employees = repo.findAll();\par
+\tab\tab if (employees != null) \{\par
+\tab\tab\tab logger.info("Fetched employees...");\par
+\tab\tab\}else \{\par
+\tab\tab\tab logger.error("List is empty!!");\par
+\tab\tab\}\par
+\tab\tab return employees;\par
+\tab\}\par
+\tab\par
+\tab @PreAuthorize("hasRole('ADMIN')")\par
+\tab @PostMapping\par
+\tab public Employee createEmployee(@Valid @RequestBody Employee employee) \{\par
+\tab\tab if(employee.getName()==null || employee.getName().length()==0) \{\par
+\tab\tab\tab logger.error("Name can't be null");\par
+\tab\tab\tab throw new ResourceException("");\par
+\tab\tab\}else \{\par
+\tab\tab\tab logger.info("New Student added..");\par
+\tab\tab\}\par
+\tab\tab return repo.save(employee);\par
+\tab\}\par
+\tab\par
+\tab @GetMapping("\{id\}")\par
+\tab public ResponseEntity<Employee> getEmployee(@PathVariable int id)\{\par
+\tab\tab logger.warn("Enter correct ID!!");\par
+\tab\tab Employee employee = repo.findById(id).orElseThrow(()-> new ResourceException(""));\par
+\tab\tab logger.warn("Fetched student by ID: \{\}",id);\par
+\tab\tab return ResponseEntity.ok(employee);\par
+\tab\}\par
+\tab\par
+\tab @PreAuthorize("hasRole('ADMIN')")\par
+\tab @PutMapping("\{id\}")\par
+\tab public ResponseEntity<Employee> updateEmployee(@PathVariable int id, @RequestBody Employee employee)\{\par
+\tab\tab Employee updateEmployee = repo.findById(id).orElseThrow(()-> new ResourceException(""));\par
+\tab\tab updateEmployee.setName(employee.getName());\par
+\tab\tab updateEmployee.setSalary(employee.getSalary());\par
+\tab\tab repo.save(updateEmployee);\par
+\tab\tab\par
+\tab\tab if(employee.getName()==null || employee.getName().length()==0) \{\par
+\tab\tab\tab logger.info("Name can,t be null");\par
+\tab\tab\tab throw new ResourceException("");\par
+\tab\tab\}else \{\par
+\tab\tab\tab logger.info("Updated successfully...");\par
+\tab\tab\}\par
+\tab\tab\par
+\tab\tab return ResponseEntity.ok(updateEmployee);\par
+\tab\}\par
+\tab\par
+\tab @PreAuthorize("hasRole('ADMIN')")\par
+\tab @DeleteMapping("\{id\}")\par
+\tab public ResponseEntity<Employee> deleteEmployee(@PathVariable int id)\{\par
+\tab\tab Employee deleteEmployee = repo.findById(id).orElseThrow(()-> new ResourceException(""));\par
+\tab\tab repo.delete(deleteEmployee);\par
+\tab\tab logger.info("Deleted successfully...");\par
+\tab\tab return new ResponseEntity<>(HttpStatus.NO_CONTENT);\par
+\tab\}\par
+\tab\par
+\tab @PostMapping("/authenticate")\par
+\tab public String authenticateAndGetToken(@RequestBody AuthRequest authRequest) \{\par
+\tab\tab Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getUsername(),authRequest.getPassword()));\par
+\tab\tab if(authentication.isAuthenticated()) \{\par
+\tab\tab\tab return jwtService.generateToken(authRequest.getUsername());\par
+\tab\tab\}else \{\par
+\tab\tab\tab throw new ResourceException("Invalid USER Request!!");\par
+\tab\tab\}\par
+\tab\tab\par
+\tab\tab\par
+\tab\}\par
+\}\par
+\par
+\par
+\par
+\par
+\par
+ResourceException\par
+\par
+\par
+package com.example.demo.exception;\par
+\par
+import org.springframework.http.HttpStatus;\par
+import org.springframework.web.bind.annotation.ResponseStatus;\par
+\par
+@ResponseStatus(value = HttpStatus.NOT_FOUND)\par
+public class ResourceException extends RuntimeException\{\par
+\par
+\tab public ResourceException(String message) \{\par
+\tab\tab super(message);\par
+\tab\}\par
+\}\par
+\par
+\par
+\par
+\par
+JwtAuthFilter\par
+\par
+\par
+\par
+\par
+\par
+package com.example.demo.filter;\par
+\par
+import java.io.IOException;\par
+\par
+import org.springframework.beans.factory.annotation.Autowired;\par
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;\par
+import org.springframework.security.core.context.SecurityContextHolder;\par
+import org.springframework.stereotype.Component;\par
+import org.springframework.web.filter.OncePerRequestFilter;\par
+\par
+import com.example.demo.config.SecurityConfig;\par
+import com.example.demo.service.JwtService;\par
+\par
+import jakarta.servlet.FilterChain;\par
+import jakarta.servlet.ServletException;\par
+import jakarta.servlet.http.HttpServletRequest;\par
+import jakarta.servlet.http.HttpServletResponse;\par
+\par
+@Component\par
+public class JwtAuthFilter extends OncePerRequestFilter\{\par
+\par
+//\tab private final SecurityConfig securityConfig;\par
+//\tab\par
+//\tab public JwtAuthFilter(SecurityConfig securityConfig) \{\par
+//\tab\tab this.securityConfig = securityConfig;\par
+//\tab\}\par
+\tab\par
+\tab @Autowired\par
+\tab private JwtService jwtService;\par
+\tab\par
+\tab @Override\par
+\tab protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)\par
+\tab\tab\tab throws ServletException, IOException \{\par
+\tab\tab String authHeader = request.getHeader("Authorization");\par
+\tab\tab String token = null;\par
+\tab\tab String username=null;\par
+\tab\tab if(authHeader != null && authHeader.startsWith("Bearer ")) \{\par
+\tab\tab\tab token = authHeader.substring(7);\par
+\tab\tab\tab username = jwtService.extractUsername(token);\par
+\tab\tab\}\par
+\tab\tab\par
+\par
+\tab\tab if(username != null && SecurityContextHolder.getContext().getAuthentication()==null) \{\par
+\tab\tab\tab if(jwtService.validateToken(token, username)) \{\par
+\tab\tab\tab\tab UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(username, null, null);\par
+\tab\tab\tab\tab SecurityContextHolder.getContext().setAuthentication(authentication);\par
+\tab\tab\tab\}\par
+\tab\tab\}\par
+\tab\tab\par
+\tab\tab filterChain.doFilter(request, response);\par
+\tab\}\par
+\}\par
+\par
+\par
+\par
+\par
+\par
+AuthRequest\par
+\par
+\par
+\par
+\cf1\b\f1\fs20 package\cf2\b0  com.example.demo.model;\cf0\par
+\par
+\cf1\b public\cf2\b0  \cf1\b class\cf2\b0  AuthRequest \{\cf0\par
+\par
+\cf2\tab\cf1\b private\cf2\b0  String \cf3 username\cf2 ;\cf0\par
+\cf2\tab\cf1\b private\cf2\b0  String \cf3 password\cf2 ;\cf0\par
+\cf2\tab\cf0\par
+\cf2\tab\cf0\par
+\cf2\tab\cf1\b public\cf2\b0  AuthRequest(String \cf4 username\cf2 , String \cf4 password\cf2 ) \{\cf0\par
+\cf2\tab\tab\cf1\b super\cf2\b0 ();\cf0\par
+\cf2\tab\tab\cf1\b this\cf2\b0 .\cf3 username\cf2  = \cf4 username\cf2 ;\cf0\par
+\cf2\tab\tab\cf1\b this\cf2\b0 .\cf3 password\cf2  = \cf4 password\cf2 ;\cf0\par
+\cf2\tab\}\cf0\par
+\cf2\tab\cf0\par
+\cf2\tab\cf1\b public\cf2\b0  AuthRequest() \{\cf0\par
+\cf2\tab\tab\cf1\b super\cf2\b0 ();\cf0\par
+\cf2\tab\}\cf0\par
+\par
+\cf2\tab\cf0\par
+\cf2\tab\cf0\par
+\cf2\tab\cf1\b public\cf2\b0  String getUsername() \{\cf0\par
+\cf2\tab\tab\cf1\b return\cf2\b0  \cf3 username\cf2 ;\cf0\par
+\cf2\tab\}\cf0\par
+\cf2\tab\cf1\b public\cf2\b0  \cf1\b void\cf2\b0  setUsername(String \cf4 username\cf2 ) \{\cf0\par
+\cf2\tab\tab\cf1\b this\cf2\b0 .\cf3 username\cf2  = \cf4 username\cf2 ;\cf0\par
+\cf2\tab\}\cf0\par
+\par
+\cf2\tab\cf0\par
+\cf2\tab\cf1\b public\cf2\b0  String getPassword() \{\cf0\par
+\cf2\tab\tab\cf1\b return\cf2\b0  \cf3 password\cf2 ;\cf0\par
+\cf2\tab\}\cf0\par
+\cf2\tab\cf1\b public\cf2\b0  \cf1\b void\cf2\b0  setPassword(String \cf4 password\cf2 ) \{\cf0\par
+\cf2\tab\tab\cf1\b this\cf2\b0 .\cf3 password\cf2  = \cf4 password\cf2 ;\cf0\par
+\cf2\tab\}\cf0\par
+\cf2\}\cf0\par
+\f0\fs22\par
+\par
+\par
+\par
+Employee\par
+\par
+\par
+\par
+package com.example.demo.model;\par
+\par
+import jakarta.persistence.Column;\par
+import jakarta.persistence.Entity;\par
+import jakarta.persistence.GeneratedValue;\par
+import jakarta.persistence.GenerationType;\par
+import jakarta.persistence.Id;\par
+import jakarta.persistence.Table;\par
+\par
+@Entity\par
+@Table(name= "employees")\par
+public class Employee \{\par
+\par
+\tab @Id\par
+\tab @GeneratedValue(strategy = GenerationType.IDENTITY)\par
+\tab private int id;\par
+\tab\par
+\tab @Column\par
+\tab private String name;\par
+\tab\par
+\tab @Column\par
+\tab private float salary;\par
+\tab\par
+\tab\par
+\tab\par
+\tab public Employee(String name, float salary) \{\par
+\tab\tab super();\par
+\tab\tab this.name = name;\par
+\tab\tab this.salary = salary;\par
+\tab\}\par
+\tab\par
+\tab\par
+\tab public Employee() \{\par
+\tab\tab super();\par
+\tab\}\par
+\par
+\par
+\tab public int getId() \{\par
+\tab\tab return id;\par
+\tab\}\par
+\tab public void setId(int id) \{\par
+\tab\tab this.id = id;\par
+\tab\}\par
+\tab\par
+\tab\par
+\tab public String getName() \{\par
+\tab\tab return name;\par
+\tab\}\par
+\tab public void setName(String name) \{\par
+\tab\tab this.name = name;\par
+\tab\}\par
+\tab\par
+\tab\par
+\tab public float getSalary() \{\par
+\tab\tab return salary;\par
+\tab\}\par
+\tab public void setSalary(float salary) \{\par
+\tab\tab this.salary = salary;\par
+\tab\}\par
+\}\par
+\par
+\par
+\par
+\par
+EmployeeRepository\par
+\par
+\par
+\par
+\par
+\par
+\par
+package com.example.demo.repository;\par
+\par
+import org.springframework.data.jpa.repository.JpaRepository;\par
+\par
+import com.example.demo.model.Employee;\par
+\par
+public interface EmployeeRepository extends JpaRepository<Employee , Integer>\{\par
+\par
+\}\par
+\par
+\par
+\par
+\par
+\par
+\par
+JwtService\par
+\par
+\par
+\par
+\par
+\par
+\par
+//package com.example.demo.service;\par
+//\par
+//import java.security.Key;\par
+//import java.util.Date;\par
+//import java.util.HashMap;\par
+//import java.util.Map;\par
+//import java.util.function.Function;\par
+//\par
+//import javax.crypto.SecretKey;\par
+//\par
+//import org.springframework.beans.factory.annotation.Value;\par
+//import org.springframework.security.core.userdetails.UserDetails;\par
+//import org.springframework.stereotype.Component;\par
+//\par
+//import io.jsonwebtoken.Claims;\par
+//import io.jsonwebtoken.Jwts;\par
+//import io.jsonwebtoken.SignatureAlgorithm;\par
+//import io.jsonwebtoken.io.Decoders;\par
+//import io.jsonwebtoken.security.Keys;\par
+//import jakarta.annotation.PostConstruct;\par
+//\par
+//@Component\par
+//public class JwtService \{\par
+//\par
+//\tab\par
+//\tab\par
+//\tab private static final String SECRET ="1JaUIdFutyGLlmbC9wIRCS0vosuwrBlO47Hg2eT75H5beV1caEvQ30ACe8hXKrxI";\par
+//\par
+//\tab public String generateToken(String username) \{\par
+//\tab\tab Map<String,Object> claims=new HashMap<>();\par
+//\tab\tab return createToken(claims,username);\par
+//\tab\}\par
+//\par
+//\tab private String createToken(Map<String, Object> claims, String username) \{\par
+//\tab\tab return Jwts.builder()\par
+//\tab\tab\tab\tab .setClaims(claims)\par
+//\tab\tab\tab\tab .setSubject(username)\par
+//\tab\tab\tab\tab .setIssuedAt(new Date(System.currentTimeMillis()))\par
+//\tab\tab\tab\tab .setExpiration(new Date(System.currentTimeMillis()+1000*60*30))\par
+//\tab\tab\tab\tab .signWith(SignatureAlgorithm.HS256, getSignKey())\par
+//\tab\tab\tab\tab .compact();\par
+//\tab\}\par
+//\par
+//\tab private Key getSignKey() \{\par
+//\tab\tab byte[] keyBytes = Decoders.BASE64.decode(SECRET);\par
+//\tab\tab return Keys.hmacShaKeyFor(keyBytes);\par
+//\tab\}\par
+//\}\par
+\par
+package com.example.demo.service;\par
+\par
+import io.jsonwebtoken.Claims;\par
+import io.jsonwebtoken.Jwts;\par
+import io.jsonwebtoken.SignatureAlgorithm;\par
+\par
+import org.springframework.security.core.userdetails.UserDetails;\par
+import org.springframework.stereotype.Component;\par
+import javax.crypto.spec.SecretKeySpec;\par
+import java.security.Key;\par
+import java.util.Date;\par
+import java.util.function.Function;\par
+\par
+@Component\par
+public class JwtService \{\par
+\par
+    private static final String SECRET = "LOmjobN05wSW99rVfjZxDodP7U5SHYyS";\par
+\par
+    public String extractUsername(String token) \{\par
+    \tab return extractClaim(token, Claims::getSubject);\par
+    \}\par
+    \par
+    public Date extractExpiration(String token) \{\par
+    \tab return extractClaim(token, Claims::getExpiration);\par
+    \}\par
+    \par
+\tab private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) \{\par
+\tab\tab final Claims claims = extractAllClaims(token);\par
+\tab\tab return claimsResolver.apply(claims);\par
+\tab\}\par
+\par
+\tab private Claims extractAllClaims(String token) \{\par
+\tab\tab // TODO Auto-generated method stub\par
+\tab\tab return Jwts\par
+\tab\tab\tab\tab .parser()\par
+\tab\tab\tab\tab .setSigningKey(getSignKey())\par
+\tab\tab\tab\tab //.build()\par
+\tab\tab\tab\tab .parseClaimsJws(token)\par
+\tab\tab\tab\tab .getBody();\par
+\tab\}\par
+\tab\par
+\tab private Boolean isTokenExpired(String token) \{\par
+\tab\tab return extractExpiration(token).before(new Date());\par
+\tab\}\par
+\par
+//\tab public Boolean validateToken(String token, UserDetails userDetails) \{\par
+//\tab\tab final String username = extractUsername(token);\par
+//\tab\tab return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));\par
+//\tab\}\par
+\tab\par
+\tab public Boolean validateToken(String token, String username) \{\par
+\tab     return (username.equals(extractUsername(token)) && !isTokenExpired(token));\par
+\tab\}\par
+\par
+\tab\par
+\tab public String generateToken(String username) \{\par
+        return createToken(username);\par
+    \}\par
+\par
+    private String createToken(String username) \{\par
+        Date now = new Date();\par
+        Date expiryDate = new Date(now.getTime() + 1000 * 60 * 30);\par
+\par
+        return Jwts.builder()\par
+                .setSubject(username)\par
+                .setIssuedAt(now)\par
+                .setExpiration(expiryDate)\par
+                .signWith(SignatureAlgorithm.HS256, getSignKey())\par
+                .compact();\par
+    \}\par
+    \par
+//    public String extractUsername(String token) \{\par
+//    \tab return extractClaim(token, Claims::getSubject);\par
+//    \}\par
+//\par
+//    private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) \{\par
+//\tab\tab final Claims claims = extractAllClaims(token);\par
+//\tab\tab return claimsResolver.apply(claims);\par
+//\tab\}\par
+//\par
+//\tab private Claims extractAllClaims(String token) \{\par
+//\tab\tab return Jwts.parser().setSigningKey(getSignKey()).parseClaimsJws(token).getBody();\par
+//\tab\}\par
+\par
+\tab private Key getSignKey() \{\par
+        return new SecretKeySpec(SECRET.getBytes(), SignatureAlgorithm.HS256.getJcaName());\par
+    \}\par
+\}\par
+\par
+\par
+\par
+\par
+applicationProperties\par
+\par
+\par
+\par
+\par
+\cf5\f1\fs20 #spring.security.user.name=harshini\cf0\par
+\cf5 #spring.security.user.password=harshini\cf0\par
+\cf5 #spring.security.user.roles=ADMIN\cf0\par
+\par
+\cf2 spring.datasource.url= \cf6 jdbc:mysql://localhost:3306/springboot\cf0\par
+\cf2 spring.datasource.username= \cf6 root\cf0\par
+\cf2 spring.datasource.password= \cf6 H@rshini1111\cf0\par
+\cf2 spring.jpa.hibernate.ddl-auto= \cf6 update\cf0\par
+\par
+\cf2 logging.level.com.example.demo=\cf6 debug\cf0\par
+\par
+\cf2 spring.main.allow-circular-references=\cf6 true\cf0\par
+\cf2 spring.main.allow-bean-definition-overriding=\cf6 true\cf0\par
+\par
+\f0\fs22\par
+\par
+\par
+\par
+pom.xml\par
+\par
+\par
+\par
+\par
+\par
+\cf7\ul\f1\fs20 <\ulnone ?\cf8 xml\cf5  version\cf7 =\cf5 "\cf7 1.0\cf5 " encoding\cf7 =\cf5 "\cf7 UTF-8\cf5 "\cf7 ?>\cf0\par
+\cf2 <\cf8 project\cf2  \cf5 xmlns\cf2 =\cf5 "\cf6 http://maven.apache.org/POM/4.0.0\cf5 "\cf2  \cf5 xmlns:xsi\cf2 =\cf5 "\cf6 http://www.w3.org/2001/XMLSchema-instance\cf5 "\cf0\par
+\cf2\tab\cf5 xsi:schemaLocation\cf2 =\cf5 "\cf6 http://maven.apache.org/POM/4.0.0 {\ul{\field{\*\fldinst{HYPERLINK https://maven.apache.org/xsd/maven-4.0.0.xsd }}{\fldrslt{https://maven.apache.org/xsd/maven-4.0.0.xsd}}}}\cf5\f1\fs20 "\cf2 >\cf0\par
+\cf2\tab <\cf8 modelVersion\cf2 >4.0.0</\cf8 modelVersion\cf2 >\cf0\par
+\cf2\tab <\cf8 parent\cf2 >\cf0\par
+\cf2\tab\tab <\cf8 groupId\cf2 >org.springframework.boot</\cf8 groupId\cf2 >\cf0\par
+\cf2\tab\tab <\cf8 artifactId\cf2 >spring-boot-starter-parent</\cf8 artifactId\cf2 >\cf0\par
+\cf2\tab\tab <\cf8 version\cf2 >3.1.2</\cf8 version\cf2 >\cf0\par
+\cf2\tab\tab <\cf8 relativePath\cf2 /> \cf5 <!-- lookup parent from repository -->\cf0\par
+\cf2\tab </\cf8 parent\cf2 >\cf0\par
+\cf2\tab <\cf8 groupId\cf2 >com.example</\cf8 groupId\cf2 >\cf0\par
+\cf2\tab <\cf8 artifactId\cf2 >EmployeeSpringSecurity</\cf8 artifactId\cf2 >\cf0\par
+\cf2\tab <\cf8 version\cf2 >0.0.1-SNAPSHOT</\cf8 version\cf2 >\cf0\par
+\cf2\tab <\cf8 name\cf2 >EmployeeSpringSecurity</\cf8 name\cf2 >\cf0\par
+\cf2\tab <\cf8 description\cf2 >Demo project for Spring Boot</\cf8 description\cf2 >\cf0\par
+\cf2\tab <\cf8 properties\cf2 >\cf0\par
+\cf2\tab\tab <\cf8 java.version\cf2 >17</\cf8 java.version\cf2 >\cf0\par
+\cf2\tab </\cf8 properties\cf2 >\cf0\par
+\cf2\tab <\cf8 dependencies\cf2 >\cf0\par
+\cf2\tab\tab <\cf8 dependency\cf2 >\cf0\par
+\cf2             <\cf8 groupId\cf2 >org.springframework.boot</\cf8 groupId\cf2 >\cf0\par
+\cf2             <\cf8 artifactId\cf2 >spring-boot-starter-data-jpa</\cf8 artifactId\cf2 >\cf0\par
+\cf2         </\cf8 dependency\cf2 >\cf0\par
+\cf2         <\cf8 dependency\cf2 >\cf0\par
+\cf2             <\cf8 groupId\cf2 >org.springframework.boot</\cf8 groupId\cf2 >\cf0\par
+\cf2             <\cf8 artifactId\cf2 >spring-boot-starter-web</\cf8 artifactId\cf2 >\cf0\par
+\cf2         </\cf8 dependency\cf2 >\cf0\par
+\cf2         \cf0\par
+\cf2\tab\tab <\cf8 dependency\cf2 >\cf0\par
+\cf2     \tab\tab <\cf8 groupId\cf2 >org.springframework.boot</\cf8 groupId\cf2 >\cf0\par
+\cf2     \tab\tab <\cf8 artifactId\cf2 >spring-boot-starter-security</\cf8 artifactId\cf2 >\cf0\par
+\cf2\tab\tab </\cf8 dependency\cf2 >\cf0\par
+\par
+\cf2\tab\tab <\cf8 dependency\cf2 >\cf0\par
+\cf2     \tab\tab <\cf8 groupId\cf2 >io.jsonwebtoken</\cf8 groupId\cf2 >\cf0\par
+\cf2     \tab\tab <\cf8 artifactId\cf2 >jjwt</\cf8 artifactId\cf2 >\cf0\par
+\cf2     \tab\tab <\cf8 version\cf2 >0.9.1</\cf8 version\cf2 >\cf0\par
+\cf2\tab\tab </\cf8 dependency\cf2 >\cf0\par
+\cf2\tab\tab <\cf8 dependency\cf2 >\cf0\par
+\cf2     \tab\tab <\cf8 groupId\cf2 >io.jsonwebtoken</\cf8 groupId\cf2 >\cf0\par
+\cf2     \tab\tab <\cf8 artifactId\cf2 >jjwt-api</\cf8 artifactId\cf2 >\cf0\par
+\cf2     \tab\tab <\cf8 version\cf2 >0.11.5</\cf8 version\cf2 >\cf0\par
+\cf2\tab\tab </\cf8 dependency\cf2 >\cf0\par
+\cf2\tab\tab <\cf8 dependency\cf2 >\cf0\par
+\cf2     \tab\tab <\cf8 groupId\cf2 >io.jsonwebtoken</\cf8 groupId\cf2 >\cf0\par
+\cf2     \tab\tab <\cf8 artifactId\cf2 >jjwt-impl</\cf8 artifactId\cf2 >\cf0\par
+\cf2     \tab\tab <\cf8 version\cf2 >0.11.5</\cf8 version\cf2 >\cf0\par
+\cf2     \tab\tab <\cf8 scope\cf2 >runtime</\cf8 scope\cf2 >\cf0\par
+\cf2\tab\tab </\cf8 dependency\cf2 >\cf0\par
+\cf2\tab\tab <\cf8 dependency\cf2 >\cf0\par
+\cf2     \tab\tab <\cf8 groupId\cf2 >io.jsonwebtoken</\cf8 groupId\cf2 >\cf0\par
+\cf2     \tab\tab <\cf8 artifactId\cf2 >jjwt-jackson</\cf8 artifactId\cf2 >\cf0\par
+\cf2     \tab\tab <\cf8 version\cf2 >0.11.5</\cf8 version\cf2 >\cf0\par
+\cf2     \tab\tab <\cf8 scope\cf2 >runtime</\cf8 scope\cf2 >\cf0\par
+\cf2\tab\tab </\cf8 dependency\cf2 >\cf0\par
+\cf2\tab\tab <\cf8 dependency\cf2 >\cf0\par
+\cf2     \tab\tab <\cf8 groupId\cf2 >javax.xml.bind</\cf8 groupId\cf2 >\cf0\par
+\cf2     \tab\tab <\cf8 artifactId\cf2 >jaxb-api</\cf8 artifactId\cf2 >\cf0\par
+\cf2     \tab\tab <\cf8 version\cf2 >2.3.1</\cf8 version\cf2 >\cf0\par
+\cf2\tab\tab </\cf8 dependency\cf2 >\cf0\par
+\par
+\cf2         <\cf8 dependency\cf2 >\cf0\par
+\cf2             <\cf8 groupId\cf2 >com.mysql</\cf8 groupId\cf2 >\cf0\par
+\cf2             <\cf8 artifactId\cf2 >mysql-connector-j</\cf8 artifactId\cf2 >\cf0\par
+\cf2             <\cf8 scope\cf2 >runtime</\cf8 scope\cf2 >\cf0\par
+\cf2         </\cf8 dependency\cf2 >\cf0\par
+\cf2         <\cf8 dependency\cf2 >\cf0\par
+\cf2             <\cf8 groupId\cf2 >org.springframework.boot</\cf8 groupId\cf2 >\cf0\par
+\cf2             <\cf8 artifactId\cf2 >spring-boot-starter-test</\cf8 artifactId\cf2 >\cf0\par
+\cf2             <\cf8 scope\cf2 >test</\cf8 scope\cf2 >\cf0\par
+\cf2         </\cf8 dependency\cf2 > \cf0\par
+\cf2         <\cf8 dependency\cf2 >\cf0\par
+\cf2             <\cf8 groupId\cf2 >org.springframework.boot</\cf8 groupId\cf2 >\cf0\par
+\cf2             <\cf8 artifactId\cf2 >spring-boot-starter-cache</\cf8 artifactId\cf2 >\cf0\par
+\cf2         </\cf8 dependency\cf2 >\cf0\par
+\cf2         <\cf8 dependency\cf2 >\cf0\par
+\cf2             <\cf8 groupId\cf2 >org.springframework.boot</\cf8 groupId\cf2 >\cf0\par
+\cf2             <\cf8 artifactId\cf2 >spring-boot-starter-validation</\cf8 artifactId\cf2 >\cf0\par
+\cf2         </\cf8 dependency\cf2 >\cf0\par
+\cf2\tab </\cf8 dependencies\cf2 >\cf0\par
+\par
+\cf2\tab <\cf8 build\cf2 >\cf0\par
+\cf2\tab\tab <\cf8 plugins\cf2 >\cf0\par
+\cf2\tab\tab\tab <\cf8 plugin\cf2 >\cf0\par
+\cf2\tab\tab\tab\tab <\cf8 groupId\cf2 >org.springframework.boot</\cf8 groupId\cf2 >\cf0\par
+\cf2\tab\tab\tab\tab <\cf8 artifactId\cf2 >spring-boot-maven-plugin</\cf8 artifactId\cf2 >\cf0\par
+\cf2\tab\tab\tab\tab <\cf8 configuration\cf2 >\cf0\par
+\cf2\tab\tab\tab\tab\tab <\cf8 image\cf2 >\cf0\par
+\cf2\tab\tab\tab\tab\tab\tab <\cf8 builder\cf2 >paketobuildpacks/builder-jammy-base:latest</\cf8 builder\cf2 >\cf0\par
+\cf2\tab\tab\tab\tab\tab </\cf8 image\cf2 >\cf0\par
+\cf2\tab\tab\tab\tab </\cf8 configuration\cf2 >\cf0\par
+\cf2\tab\tab\tab </\cf8 plugin\cf2 >\cf0\par
+\cf2\tab\tab </\cf8 plugins\cf2 >\cf0\par
+\cf2\tab </\cf8 build\cf2 >\cf0\par
+\par
+\cf2 </\cf8 project\cf2 >\cf0\par
+\f0\fs22\par
+}
+ 
