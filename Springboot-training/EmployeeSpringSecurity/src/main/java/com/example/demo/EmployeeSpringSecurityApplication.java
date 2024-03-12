@@ -14,7 +14,7 @@ import com.example.demo.repository.EmployeeRepository;
 public class EmployeeSpringSecurityApplication implements CommandLineRunner {
 
 	public static final Logger logger = LoggerFactory.getLogger(EmployeeSpringSecurityApplication.class);
-	
+
 	public static void main(String[] args) {
 		SpringApplication.run(EmployeeSpringSecurityApplication.class, args);
 		logger.info("Spring Security application started");
