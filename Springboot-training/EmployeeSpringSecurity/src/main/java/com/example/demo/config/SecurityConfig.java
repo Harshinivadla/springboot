@@ -1,14 +1,14 @@
 package com.example.demo.config;
 
+import com.example.demo.filter.CustomAuthenticationProvider;
 import com.example.demo.filter.JwtAuthFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -33,6 +33,9 @@ public class SecurityConfig {
     @Autowired
     private JwtAuthFilter jwtAuthFilter;
 
+    @Autowired
+    private CustomAuthenticationProvider authProvider;
+
     @Bean
     public static PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -45,20 +48,34 @@ public class SecurityConfig {
         provider.setPasswordEncoder(passwordEncoder());
         return provider;
     }
- 
+
+    @Bean
+    public AuthenticationManager authManager(HttpSecurity http) throws Exception{
+        AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
+        authenticationManagerBuilder.authenticationProvider(authProvider);
+        return authenticationManagerBuilder.build();
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
+
         http.csrf(AbstractHttpConfigurer::disable)
+
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/employees/authenticate", "/employees", "/employees/{id}").permitAll())
+
+//                .authorizeHttpRequests(requests -> requests
+//                        .requestMatchers("/employees/new", "/employees/update/{id}", "/employees/delete/{id}").authenticated())
+
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers(HttpMethod.POST, "/employees/new").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/employees/update/{id}").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/employees/delete/{id}").hasRole("ADMIN")
-                        .anyRequest().authenticated()
-                )
+                        .requestMatchers("/employees/new").hasRole("ADMIN")
+                        .requestMatchers("/employees/update/{id}").hasRole("ADMIN")
+                        .requestMatchers("/employees/delete/{id}").hasRole("ADMIN")
+                        .anyRequest().authenticated())
+
                 .sessionManagement(management -> management
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
@@ -68,7 +85,7 @@ public class SecurityConfig {
         UserDetails harshini = User.builder()
                 .username("harshini")
                 .password(passwordEncoder().encode("harshini"))
-                .roles("USER")
+                .roles("ADMIN")
                 .build();
 
         UserDetails admin = User.builder()
@@ -79,10 +96,11 @@ public class SecurityConfig {
 
         return new InMemoryUserDetailsManager(harshini, admin);
     }
-    
-    
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
-    }
+
+
+
+//    @Bean
+//    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+//        return config.getAuthenticationManager();
+//    }
 }

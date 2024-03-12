@@ -1,8 +1,11 @@
 package com.example.demo.controller;
 
-import java.util.List;
-
-import org.jetbrains.annotations.NotNull;
+import com.example.demo.exception.ResourceException;
+import com.example.demo.model.AuthRequest;
+import com.example.demo.model.Employee;
+import com.example.demo.repository.EmployeeRepository;
+import com.example.demo.service.JwtService;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,15 +15,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-
-import com.example.demo.exception.ResourceException;
-import com.example.demo.model.AuthRequest;
-import com.example.demo.model.Employee;
-import com.example.demo.repository.EmployeeRepository;
-import com.example.demo.service.JwtService;
-
-import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/employees")
@@ -45,7 +42,7 @@ public class EmployeeController {
     }
 
     @PostMapping("/new")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Employee> createEmployee(@Valid @RequestBody Employee employee) {
     	if (employee.getName() == null || employee.getName().isEmpty()) {
             logger.error("Name can't be null");
@@ -64,10 +61,9 @@ public class EmployeeController {
         return ResponseEntity.ok(employee);
     }
 
-
     @PutMapping("/update/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Employee> updateEmployee(@PathVariable int id, @RequestBody @NotNull Employee employee) {
+    public ResponseEntity<Employee> updateEmployee(@PathVariable int id, @RequestBody Employee employee) {
         Employee updateEmployee = repo.findById(id)
                 .orElseThrow(() -> new ResourceException("Employee not found with ID: " + id));
         updateEmployee.setName(employee.getName());
@@ -88,7 +84,7 @@ public class EmployeeController {
     }
 
 	@PostMapping("/authenticate")
-    public ResponseEntity<String> authenticateAndGetToken(@org.jetbrains.annotations.NotNull @RequestBody AuthRequest authRequest) {
+    public ResponseEntity<String> authenticateAndGetToken(@RequestBody AuthRequest authRequest) {
         Authentication authentication = authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword())
         );
